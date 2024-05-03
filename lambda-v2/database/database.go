@@ -6,7 +6,6 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
@@ -54,12 +53,9 @@ func (db DynamoDBClient) DoesUserExist(email string) (bool, error) {
 }
 
 func (db DynamoDBClient) InsertUser(user dto.RegisterUser) error {
-	item, err := attributevalue.MarshalMap(user)
-	if err != nil {
-		return err
-	}
+	item := map[string]types.AttributeValue{"email": &types.AttributeValueMemberS{Value: user.Email}, "password": &types.AttributeValueMemberS{Value: user.Password}}
 
-	_, err = db.client.PutItem(context.TODO(), &dynamodb.PutItemInput{TableName: aws.String(TABLE_NAME), Item: item})
+	_, err := db.client.PutItem(context.TODO(), &dynamodb.PutItemInput{TableName: aws.String(TABLE_NAME), Item: item})
 	if err != nil {
 		return err
 	}

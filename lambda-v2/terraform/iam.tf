@@ -3,10 +3,12 @@ data "aws_iam_policy_document" "allow_dynamodb_table_operations" {
         effect = "Allow"
         actions = [
             "dynamodb:PutItem",
+            "dynamodb:GetItem",
+            "dynamodb:DeleteItem",
         ]
 
         resources = [
-            aws_dynamodb_table.profiles.arn,
+            aws_dynamodb_table.users.arn,
         ]
     }
 }

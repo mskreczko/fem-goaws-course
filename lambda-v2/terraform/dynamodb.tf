@@ -1,15 +1,10 @@
-resource "aws_dynamodb_table" "users-table" {
+resource "aws_dynamodb_table" "users" {
     name = "users"
     billing_mode = "PAY_PER_REQUEST"
     hash_key = "email"
 
     attribute {
-        name = "Email"
-        type = "S"
-    }
-
-    attribute {
-        name = "Password"
+        name = "email"
         type = "S"
     }
 }

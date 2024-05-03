@@ -4,10 +4,6 @@ terraform {
         source = "hashicorp/aws"
         version = "~> 5.0"
       }
-      aws_dynamodb_table = {
-        source = "terraform-aws-modules/dynamodb-table/aws"
-        version = "4.0.1"
-      }
       archive = {
         source = "hashicorp/archive"
       }
@@ -20,7 +16,6 @@ terraform {
 provider "aws" {
   region = "us-west-2"
   shared_credentials_files = ["/home/mskreczko/.aws/credentials"]
-  profile = "mskreczko"
 }
 
 resource "aws_vpc" "example_vpc" {
