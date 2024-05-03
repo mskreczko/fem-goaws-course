@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"lambda-v2/dto"
+	"log"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -13,6 +14,11 @@ import (
 const (
 	TABLE_NAME = "users"
 )
+
+type UserStore interface {
+	DoesUserExist(username string) (bool, error)
+	InsertUser(user dto.RegisterUser) error
+}
 
 type DynamoDBClient struct {
 	cfg    aws.Config
@@ -53,10 +59,16 @@ func (db DynamoDBClient) DoesUserExist(email string) (bool, error) {
 }
 
 func (db DynamoDBClient) InsertUser(user dto.RegisterUser) error {
-	item := map[string]types.AttributeValue{"email": &types.AttributeValueMemberS{Value: user.Email}, "password": &types.AttributeValueMemberS{Value: user.Password}}
-
-	_, err := db.client.PutItem(context.TODO(), &dynamodb.PutItemInput{TableName: aws.String(TABLE_NAME), Item: item})
+	newUser, err := dto.NewUser(user)
 	if err != nil {
+		log.Print(err)
+		return err
+	}
+	item := map[string]types.AttributeValue{"email": &types.AttributeValueMemberS{Value: newUser.Email}, "password": &types.AttributeValueMemberS{Value: newUser.PasswordHash}}
+
+	_, err = db.client.PutItem(context.TODO(), &dynamodb.PutItemInput{TableName: aws.String(TABLE_NAME), Item: item})
+	if err != nil {
+		log.Print(err)
 		return err
 	}
 	return nil
