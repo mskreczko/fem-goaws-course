@@ -65,3 +65,17 @@ resource "aws_iam_role_policy_attachment" "lambda_logging_policy_attachment" {
     role = aws_iam_role.lambda.id
     policy_arn = aws_iam_policy.function_logging_policy.arn
 }
+
+resource "aws_iam_role_policy_attachment" "lambda_execution" {
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+  role = aws_iam_role.lambda.name
+}
+
+resource "aws_lambda_permission" "apigw_lambda" {
+    statement_id = "AllowExecutionFromAPIGateway"
+    action = "lambda:InvokeFunction"
+    function_name = aws_lambda_function.function.function_name
+    principal = "apigateway.amazonaws.com"
+
+    source_arn = "${aws_api_gateway_rest_api.my_api.execution_arn}/*/*/*"
+}
