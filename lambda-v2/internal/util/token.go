@@ -1,20 +1,22 @@
 package token
 
 import (
-	"lambda-v2/pkg/user"
 	"log"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func CreateToken(user user.User) string {
+func CreateToken(requestedClaims map[string]string) string {
 	now := time.Now()
 	validUntil := now.Add(time.Hour * 1).Unix()
 
 	claims := jwt.MapClaims{
-		"user":    user.Email,
 		"expires": validUntil,
+	}
+
+	for k, v := range requestedClaims {
+		claims[k] = v
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims, nil)
