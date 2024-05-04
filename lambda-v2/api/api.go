@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"lambda-v2/database"
 	"lambda-v2/dto"
 	"net/http"
@@ -103,8 +104,11 @@ func (api ApiHandler) LoginUser(request events.APIGatewayProxyRequest) (events.A
 		}, nil
 	}
 
+	accessToken := dto.CreateToken(user)
+	successMsg := fmt.Sprintf(`{"access_token: "%s"}`, accessToken)
+
 	return events.APIGatewayProxyResponse{
-		Body:       "Successfully logged in",
+		Body:       successMsg,
 		StatusCode: http.StatusOK,
 	}, nil
 }

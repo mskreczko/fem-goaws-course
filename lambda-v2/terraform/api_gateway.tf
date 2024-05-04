@@ -140,6 +140,11 @@ locals {
             method = "POST",
             path_part = "login",
             description = "Login endpoint"
+        },
+        protected = {
+          method = "POST",
+          path_part = "protected",
+          description = "Protected endpoint"
         }
     }
 }
