@@ -79,3 +79,46 @@ resource "aws_lambda_permission" "apigw_lambda" {
 
     source_arn = "${aws_api_gateway_rest_api.my_api.execution_arn}/*/*/*"
 }
+
+data "aws_iam_policy_document" "assume_gateway_role" {
+    statement {
+        actions = ["sts:AssumeRole"]
+        effect = "Allow"
+
+        principals {
+            type = "Service"
+            identifiers = ["apigateway.amazonaws.com"]
+        }
+    }
+}
+
+resource "aws_iam_role" "gateway" {
+    name = "AssumeGatewayRole"
+    description = "Role for gateway to assume gateway"
+    assume_role_policy = data.aws_iam_policy_document.assume_gateway_role.json
+}
+
+data "aws_iam_policy_document" "allow_gateway_logging" {
+    statement {
+        effect = "Allow"
+        actions = [
+            "logs:CreateLogStream",
+            "logs:PutLogEvents",
+        ]
+
+        resources = [
+            "arn:aws:logs:*:*:*",
+        ]
+    }
+}
+
+resource "aws_iam_policy" "gateway_logging_policy" {
+    name = "AllowGatewayLoggingPolicy"
+    description = "Policy for gateway cloudwatch logging"
+    policy = data.aws_iam_policy_document.allow_gateway_logging.json
+}
+
+resource "aws_iam_role_policy_attachment" "gateway_logging_policy_attachment" {
+    role = aws_iam_role.gateway.id
+    policy_arn = aws_iam_policy.gateway_logging_policy.arn
+}
