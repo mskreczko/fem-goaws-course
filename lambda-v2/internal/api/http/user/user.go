@@ -3,25 +3,26 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"lambda-v2/database"
-	"lambda-v2/dto"
 	"net/http"
+
+	token "lambda-v2/internal/util"
+	"lambda-v2/pkg/user"
 
 	"github.com/aws/aws-lambda-go/events"
 )
 
 type ApiHandler struct {
-	dbStore database.UserStore
+	dbStore user.UserRepository
 }
 
-func NewApiHandler(dbStore database.UserStore) ApiHandler {
+func NewApiHandler(dbStore user.UserRepository) ApiHandler {
 	return ApiHandler{
 		dbStore: dbStore,
 	}
 }
 
 func (api ApiHandler) RegisterUserHandler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	var registerUser dto.RegisterUser
+	var registerUser user.RegisterUser
 	err := json.Unmarshal([]byte(request.Body), &registerUser)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
@@ -52,7 +53,7 @@ func (api ApiHandler) RegisterUserHandler(request events.APIGatewayProxyRequest)
 		}, err
 	}
 
-	user, err := dto.NewUser(registerUser)
+	user, err := user.NewUser(registerUser)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			Body:       "Internal server error",
@@ -89,7 +90,7 @@ func (api ApiHandler) LoginUser(request events.APIGatewayProxyRequest) (events.A
 		}, err
 	}
 
-	user, err := api.dbStore.GetUser(loginRequest.Email)
+	_user, err := api.dbStore.GetUser(loginRequest.Email)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			Body:       "Internal server error",
@@ -97,14 +98,14 @@ func (api ApiHandler) LoginUser(request events.APIGatewayProxyRequest) (events.A
 		}, err
 	}
 
-	if !dto.ValidatePassword(user.Password, loginRequest.Password) {
+	if !user.ValidatePassword(_user.Password, loginRequest.Password) {
 		return events.APIGatewayProxyResponse{
 			Body:       "Invalid credentials",
 			StatusCode: http.StatusBadRequest,
 		}, nil
 	}
 
-	accessToken := dto.CreateToken(user)
+	accessToken := token.CreateToken(_user)
 	successMsg := fmt.Sprintf(`{"access_token: "%s"}`, accessToken)
 
 	return events.APIGatewayProxyResponse{

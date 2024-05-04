@@ -1,10 +1,8 @@
-package database
+package user
 
 import (
 	"context"
 	"fmt"
-	"lambda-v2/dto"
-	"log"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -17,10 +15,10 @@ const (
 	TABLE_NAME = "users"
 )
 
-type UserStore interface {
+type UserRepository interface {
 	DoesUserExist(username string) (bool, error)
-	InsertUser(user dto.User) error
-	GetUser(username string) (dto.User, error)
+	InsertUser(user User) error
+	GetUser(username string) (User, error)
 }
 
 type DynamoDBClient struct {
@@ -61,7 +59,7 @@ func (db DynamoDBClient) DoesUserExist(email string) (bool, error) {
 	return true, nil
 }
 
-func (db DynamoDBClient) InsertUser(user dto.User) error {
+func (db DynamoDBClient) InsertUser(user User) error {
 	item := map[string]types.AttributeValue{"email": &types.AttributeValueMemberS{Value: user.Email}, "password": &types.AttributeValueMemberS{Value: user.Password}}
 
 	_, err := db.client.PutItem(context.TODO(), &dynamodb.PutItemInput{TableName: aws.String(TABLE_NAME), Item: item})
@@ -71,8 +69,8 @@ func (db DynamoDBClient) InsertUser(user dto.User) error {
 	return nil
 }
 
-func (db DynamoDBClient) GetUser(email string) (dto.User, error) {
-	var user dto.User
+func (db DynamoDBClient) GetUser(email string) (User, error) {
+	var user User
 
 	result, err := db.client.GetItem(context.TODO(), &dynamodb.GetItemInput{
 		TableName: aws.String(TABLE_NAME),
@@ -88,7 +86,6 @@ func (db DynamoDBClient) GetUser(email string) (dto.User, error) {
 	}
 
 	err = attributevalue.UnmarshalMap(result.Item, &user)
-	log.Print(user)
 	if err != nil {
 		return user, err
 	}

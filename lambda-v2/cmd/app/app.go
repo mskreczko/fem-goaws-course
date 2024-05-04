@@ -1,8 +1,8 @@
 package app
 
 import (
-	"lambda-v2/api"
-	"lambda-v2/database"
+	api "lambda-v2/internal/api/http/user"
+	"lambda-v2/pkg/user"
 )
 
 type App struct {
@@ -10,7 +10,7 @@ type App struct {
 }
 
 func NewApp() App {
-	db, err := database.NewDynamoDBClient()
+	db, err := user.NewDynamoDBClient()
 	if err != nil {
 		return App{}
 	}

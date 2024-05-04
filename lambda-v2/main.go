@@ -1,8 +1,8 @@
 package main
 
 import (
-	"lambda-v2/app"
-	"lambda-v2/middleware"
+	"lambda-v2/cmd/app"
+	"lambda-v2/internal/api/http/middleware"
 	"net/http"
 
 	"github.com/aws/aws-lambda-go/events"
