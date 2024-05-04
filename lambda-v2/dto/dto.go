@@ -12,8 +12,8 @@ type RegisterUser struct {
 }
 
 type User struct {
-	Email        string `json:"email"`
-	PasswordHash string `json:"password"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 func NewUser(registerUser RegisterUser) (User, error) {
@@ -24,12 +24,14 @@ func NewUser(registerUser RegisterUser) (User, error) {
 	}
 
 	return User{
-		Email:        registerUser.Email,
-		PasswordHash: string(hashedPassword),
+		Email:    registerUser.Email,
+		Password: string(hashedPassword),
 	}, nil
 }
 
 func ValidatePassword(hashedPassword, plainPassword string) bool {
+	log.Print(hashedPassword)
+	log.Print(plainPassword)
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(plainPassword))
 	return err == nil
 }
