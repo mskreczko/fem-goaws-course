@@ -66,6 +66,28 @@ resource "aws_iam_role_policy_attachment" "lambda_logging_policy_attachment" {
     policy_arn = aws_iam_policy.function_logging_policy.arn
 }
 
+data "aws_iam_policy_document" "allow_lambda_secrets" {
+    statement {
+        effect = "Allow"
+        actions = [
+            "secretsmanager:GetSecretValue",
+        ]
+
+        resources = ["*"]
+    }
+}
+
+resource "aws_iam_policy" "allow_lambda_access_secrets" {
+    name = "AllowLambdaToAccessSecretManager"
+    description = "Policy for lambda to access secret manager"
+    policy = data.aws_iam_policy_document.allow_lambda_secrets.json
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_secrets_policy_attachment" {
+    role = aws_iam_role.lambda.id
+    policy_arn = aws_iam_policy.allow_lambda_access_secrets.arn
+}
+
 resource "aws_iam_role_policy_attachment" "lambda_execution" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
   role = aws_iam_role.lambda.name
