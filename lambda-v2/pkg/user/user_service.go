@@ -59,7 +59,7 @@ func (u *UserHandler) HandleLoginUser(loginUser LoginRequest) (string, int) {
 	}
 
 	accessToken := token.CreateToken(map[string]string{"email": _user.Email})
-	successMsg := fmt.Sprintf(`{access_token: "%s}`, accessToken)
+	successMsg := fmt.Sprintf(`{access_token: "%s"}`, accessToken)
 	return successMsg, http.StatusOK
 }
 

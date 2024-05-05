@@ -14,6 +14,7 @@ func CreateToken(requestedClaims map[string]string) string {
 	validUntil := now.Add(time.Hour * 1).Unix()
 
 	claims := jwt.MapClaims{
+		"iat":     now.Unix(),
 		"expires": validUntil,
 	}
 
@@ -51,7 +52,7 @@ func ParseToken(tokenString string) (jwt.MapClaims, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		secret := "secret"
 		return []byte(secret), nil
-	})
+	}, jwt.WithValidMethods([]string{"HS256"}))
 
 	if err != nil {
 		return nil, fmt.Errorf("unauthorized")
