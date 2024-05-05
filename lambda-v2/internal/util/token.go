@@ -23,7 +23,10 @@ func CreateToken(requestedClaims map[string]string) string {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims, nil)
-	secret := "secret" // TODO move to vault
+	secret, err := GetTokenSecret()
+	if err != nil {
+		return ""
+	}
 
 	tokenString, err := token.SignedString([]byte(secret))
 	if err != nil {
@@ -50,7 +53,10 @@ func ExtractTokenFromHeaders(headers map[string]string) string {
 
 func ParseToken(tokenString string) (jwt.MapClaims, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		secret := "secret"
+		secret, err := GetTokenSecret()
+		if err != nil {
+			return nil, err
+		}
 		return []byte(secret), nil
 	}, jwt.WithValidMethods([]string{"HS256"}))
 
