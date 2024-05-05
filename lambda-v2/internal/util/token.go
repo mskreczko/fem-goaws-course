@@ -1,7 +1,9 @@
 package token
 
 import (
+	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -29,4 +31,40 @@ func CreateToken(requestedClaims map[string]string) string {
 	}
 
 	return tokenString
+}
+
+func ExtractTokenFromHeaders(headers map[string]string) string {
+	authHeader, ok := headers["Authorization"]
+	if !ok {
+		return ""
+	}
+
+	splitToken := strings.Split(authHeader, "Bearer ")
+	if len(splitToken) != 2 {
+		return ""
+	}
+
+	return splitToken[1]
+}
+
+func ParseToken(tokenString string) (jwt.MapClaims, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		secret := "secret"
+		return []byte(secret), nil
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf("unauthorized")
+	}
+
+	if !token.Valid {
+		return nil, fmt.Errorf("token is invalid")
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, fmt.Errorf("claims of unathorized type")
+	}
+
+	return claims, nil
 }
